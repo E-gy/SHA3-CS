@@ -50,17 +50,17 @@ namespace SHA3_CS {
 			}
 			return new BitString(ba);
 		}
-		public static BitString FromHexLE(string hex){
+		public static BitString FromHexLE(string hex, int g4 = 2){
 			if(hex.Length % 2 != 0) throw new InvalidOperationException("Cannot from hex little endian bit order on non-byte-full string");
 			BitArray ba = new BitArray(hex.Length*4);
-			int b = 8;
+			int b = 4*g4;
 			foreach(char c in hex){
 				byte b4 = Convert.ToByte(c.ToString(), 16);
 				ba[--b] = ((b4 >> 3) & 1) != 0;
 				ba[--b] = ((b4 >> 2) & 1) != 0;
 				ba[--b] = ((b4 >> 1) & 1) != 0;
 				ba[--b] = ((b4 >> 0) & 1) != 0;
-				if(b % 8 == 0) b += 16;
+				if(b % (4*g4) == 0) b += 2*4*g4;
 			}
 			return new BitString(ba);
 		}
@@ -129,16 +129,16 @@ namespace SHA3_CS {
 			return new string(s.ToArray());
 		}
 
-		public string ToHexLE(){
+		public string ToHexLE(int g4 = 2){
 			var s = new List<char>();
 			int getBit(int i) => i < Length && this[i] ? 1 : 0;
-			for(int b = 8; b <= Length;){
+			for(int b = 4*g4; b <= Length;){
 				int b4 = 0;
 				b4 |= (getBit(--b) << 3);
 				b4 |= (getBit(--b) << 2);
 				b4 |= (getBit(--b) << 1);
 				b4 |= (getBit(--b) << 0);
-				if(b%8 == 0) b += 16;
+				if(b%(4*g4) == 0) b += 2*4*g4;
 				s.Add(BitConverter.ToString(new byte[]{(byte) b4})[1]);
 			}
 			return new string(s.ToArray());
