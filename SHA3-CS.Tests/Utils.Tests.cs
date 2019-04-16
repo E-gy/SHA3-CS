@@ -158,7 +158,7 @@ namespace SHA3_CS.Tests {
 		}
 
 		[Test]
-		public void TestHexKnownVectors(){
+		public void TestHexBEKnownVectors(){
 			Assert.AreEqual(new bool[]{true, false, false, false, true, false, true, false}, BitString.FromHexBE("8A").Bits(), "BS From hex string failed");
 			Assert.AreEqual(new bool[]{true, false, false, false, true, false, true, false, true, true, true, true, false, false, false, false}, BitString.FromHexBE("8AF0").Bits(), "BS From hex string failed");
 			Assert.AreEqual(new bool[]{true, true, true, true, false, false, false, false}, BitString.FromHexBE("F0").Bits(), "BS From hex string failed");
@@ -169,7 +169,18 @@ namespace SHA3_CS.Tests {
 
 			Assert.AreEqual("E8", new BitString(new bool[]{true, true, true, false, true}).ToHexBE(), "BS [not mul 4] to Hex string failed");
 			Assert.AreEqual("C", new BitString(new bool[]{true, true}).ToHexBE(), "BS [not mul 4] to Hex string failed");
-		} 
+		}
+
+		[Test]
+		public void TestHexLEKnownVectors(){
+			Assert.AreEqual(new bool[]{false, true, false, true, false, false, false, true}, BitString.FromHexLE("8A").Bits(), "BS From hex string failed");
+			Assert.AreEqual(new bool[]{false, true, false, true, false, false, false, true, false, false, false, false, true, true, true, true}, BitString.FromHexLE("8AF0").Bits(), "BS From hex string failed");
+			Assert.AreEqual(new bool[]{false, false, false, false, true, true, true, true}, BitString.FromHexLE("F0").Bits(), "BS From hex string failed");
+
+			Assert.AreEqual("E5", new BitString(new bool[]{true, false, true, false, false, true, true, true}).ToHexLE(), "BS to Hex string failed");
+			Assert.AreEqual("D4", new BitString(new bool[]{false, false, true, false, true, false, true, true}).ToHexLE(), "BS to Hex string failed");
+			Assert.AreEqual("E5D4", new BitString(new bool[]{true, false, true, false, false, true, true, true, false, false, true, false, true, false, true, true}).ToHexLE(), "BS to Hex sstring failed");
+		}
 
 		[Test]
 		[Repeat(25)]
