@@ -37,7 +37,33 @@ namespace SHA3_CS {
 			return new BitString(ba);
 		}
 		public static BitString FromBase64(string b64) => new BitString(new BitArray(Convert.FromBase64String(b64)));
-		public static BitString FromHex(string hex) => new BitString(new BitArray(Enumerable.Range(0, hex.Length).Where(x => x%2==0).Select(x => Convert.ToByte(hex.Substring(x,2), 16)).ToArray()));
+		internal static byte revBits(byte b) => (byte)(((b * 0x80200802ul) & 0x0884422110ul) * 0x0101010101ul >> 32);
+		public static BitString FromHexBE(string hex){
+			BitArray ba = new BitArray(hex.Length*4);
+			int b = 0;
+			foreach(char c in hex){
+				byte b4 = Convert.ToByte(c.ToString(), 16);
+				ba[b++] = ((b4 >> 3) & 1) != 0;
+				ba[b++] = ((b4 >> 2) & 1) != 0;
+				ba[b++] = ((b4 >> 1) & 1) != 0;
+				ba[b++] = ((b4 >> 0) & 1) != 0;
+			}
+			return new BitString(ba);
+		}
+		public static BitString FromHexLE(string hex){
+			if(hex.Length % 2 != 0) throw new InvalidOperationException("Cannot from hex little endian bit order on non-byte-full string");
+			BitArray ba = new BitArray(hex.Length*4);
+			int b = 8;
+			foreach(char c in hex){
+				byte b4 = Convert.ToByte(c.ToString(), 16);
+				ba[--b] = ((b4 >> 3) & 1) != 0;
+				ba[--b] = ((b4 >> 2) & 1) != 0;
+				ba[--b] = ((b4 >> 1) & 1) != 0;
+				ba[--b] = ((b4 >> 0) & 1) != 0;
+				if(b % 8 == 0) b += 16;
+			}
+			return new BitString(ba);
+		}
 
 		public bool this[int b]{
 			get => ba[b];
@@ -89,16 +115,41 @@ namespace SHA3_CS {
 			return Convert.ToBase64String(bytes);
 		}
 
-		public string ToHex(){
-			byte[] bytes = new byte[(int) Math.Ceiling(Length/8d)];
-			ba.CopyTo(bytes, 0);
-			return BitConverter.ToString(bytes).Replace("-", "");
+		public string ToHexBE(){
+			var s = new List<char>();
+			int getBit(int i) => i < Length && this[i] ? 1 : 0;
+			for(int b = 0; b < Length;){
+				int b4 = 0;
+				b4 |= (getBit(b++) << 3);
+				b4 |= (getBit(b++) << 2);
+				b4 |= (getBit(b++) << 1);
+				b4 |= (getBit(b++) << 0);
+				s.Add(BitConverter.ToString(new byte[]{(byte) b4})[1]);
+			}
+			return new string(s.ToArray());
+		}
+
+		public string ToHexLE(){
+			var s = new List<char>();
+			int getBit(int i) => i < Length && this[i] ? 1 : 0;
+			for(int b = 8; b <= Length;){
+				int b4 = 0;
+				b4 |= (getBit(--b) << 3);
+				b4 |= (getBit(--b) << 2);
+				b4 |= (getBit(--b) << 1);
+				b4 |= (getBit(--b) << 0);
+				if(b%8 == 0) b += 16;
+				s.Add(BitConverter.ToString(new byte[]{(byte) b4})[1]);
+			}
+			return new string(s.ToArray());
 		}
 
 		/*public IEnumerator<bool> GetEnumerator(){
 			return null;//FIXME
 		}
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();*/
+
+		public override string ToString() => String.Concat(Bits().Select(b => b ? "1" : "0"));
 
 	}
 }
