@@ -68,6 +68,19 @@ namespace SHA3_CS {
 		protected abstract B3D Cpy();
 		public B3D Copy() => Cpy();
 
+		public B3D ReadFromBitString(BitString bs){
+			for(int y = 0; y < Height; y++) for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) this[x,y,z] = bs[Width*(Height*y + x) + z];
+			return this;
+		}
+
+		public BitString ToBitString(){
+			var ba = new BitArray(Length*Width*Height);
+			for(int y = 0; y < Height; y++) for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) ba[Width*(Height*y + x) + z] = this[x,y,z];
+			return new BitString(ba);
+		}
+
+
+
 		public abstract B1D Lane(int x, int y);
 		public abstract B1D Column(int x, int z);
 		public abstract B1D Row(int y, int z);
@@ -200,16 +213,11 @@ namespace SHA3_CS {
 			return d;
 		}
 
-		public static Sponge FromBitString(BitString bs, int l, int h, int w){
-			var sponge = new Sponge(l, h, w);
-			for(int y = 0; y < h; y++) for(int x = 0; x < l; x++) for(int z = 0; z < w; z++) sponge[x,y,z] = bs[w*(h*y + x) + z];
-			return sponge;
-		}
+		public static Sponge FromBitString(BitString bs, int l, int h, int w) => new Sponge(l, h, w).ReadFromBitString(bs);
 
-		public BitString ToBitString(){
-			var ba = new BitArray(Length*Width*Height);
-			for(int y = 0; y < Height; y++) for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) ba[Width*(Height*y + x) + z] = this[x,y,z];
-			return new BitString(ba);
+		public new Sponge ReadFromBitString(BitString bs){
+			base.ReadFromBitString(bs);
+			return this;
 		}
 
 		public override bool this[int x, int y, int z]{
