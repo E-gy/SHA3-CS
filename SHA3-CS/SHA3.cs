@@ -28,4 +28,24 @@ namespace SHA3_CS {
 
 	}
 
+	public class Shake {
+
+		private static readonly Keccak KECCAK1600 = new Keccak(1600);
+
+		public static readonly Shake SHAKE128 = new Shake(128);
+		public static readonly Shake SHAKE256 = new Shake(256);
+
+		private readonly SpongeConstructor constructor;
+
+		public Shake(int c2) => constructor = KECCAK1600.Keccak_c(c2*2);
+
+		public BitString Hash(BitString S, int digestLength) => constructor.Process(S+(BitString.S1+BitString.S1+BitString.S1+BitString.S1), digestLength);
+		public BitString Hash(string hexS, int d) => Hash(BitString.FromHexLE(hexS), d);
+		public BitString HashUTF8(string s, int d) => Hash(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s)), d);
+
+		public string HashHexHex(string hexS, int d) => Hash(hexS, d).ToHexLE();
+		public string HashUTF8Hex(string s, int d) => HashUTF8(s, d).ToHexLE();
+
+	}
+
 }
