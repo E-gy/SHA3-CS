@@ -228,8 +228,8 @@ namespace SHA3_CS {
 		}
 
 		public override bool this[int x, int y, int z]{
-			get => this[x.mod(Length), y.mod(Height), z.mod(Width)];
-			set => this[x.mod(Length), y.mod(Height), z.mod(Width)] = value;
+			get => bits[x.mod(Length), y.mod(Height), z.mod(Width)];
+			set => bits[x.mod(Length), y.mod(Height), z.mod(Width)] = value;
 		}
 
 		public override B1D Lane(int x, int y) => new S1D(this, Width, i => (x, y, i));
