@@ -64,6 +64,7 @@ namespace SHA3_CS {
 			}
 			return new BitString(ba);
 		}
+		public static BitString FromBytesLE(byte[] bytes) => new BitString(new BitArray(bytes));
 
 		public bool this[int b]{
 			get => ba[b];
