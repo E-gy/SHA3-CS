@@ -79,13 +79,13 @@ namespace SHA3_CS {
 			for(int y = 0; y < Height; y++) for(int z = 0; z < Width; z++) yield return Row(y, z);
 		}
 
-		public IEnumerable<(B1D src, B1D dest)> Lanes(Sponge dest){
+		public IEnumerable<(B1D src, B1D dest)> Lanes(B3D dest){
 			for(int x = 0; x < Length; x++) for(int y = 0; y < Height; y++) yield return (this.Lane(x, y), dest.Lane(x, y));
 		}
-		public IEnumerable<(B1D src, B1D dest)> Columns(Sponge dest){
+		public IEnumerable<(B1D src, B1D dest)> Columns(B3D dest){
 			for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) yield return (this.Column(x, z), dest.Column(x, z));
 		}
-		public IEnumerable<(B1D src, B1D dest)> Rows(Sponge dest){
+		public IEnumerable<(B1D src, B1D dest)> Rows(B3D dest){
 			for(int y = 0; y < Height; y++) for(int z = 0; z < Width; z++) yield return (this.Row(y, z), dest.Row(y, z));
 		}
 
@@ -105,13 +105,13 @@ namespace SHA3_CS {
 			for(int z = 0; z < Width; z++) yield return Slice(z);
 		}
 
-		public IEnumerable<(B2D src, B2D dest)> Sheets(Sponge dest){
+		public IEnumerable<(B2D src, B2D dest)> Sheets(B3D dest){
 			for(int x = 0; x < Length; x++) yield return (this.Sheet(x), dest.Sheet(x));
 		}
-		public IEnumerable<(B2D src, B2D dest)> Planes(Sponge dest){
+		public IEnumerable<(B2D src, B2D dest)> Planes(B3D dest){
 			for(int y = 0; y < Height; y++) yield return (this.Plane(y), dest.Plane(y));
 		}
-		public IEnumerable<(B2D src, B2D dest)> Slices(Sponge dest){
+		public IEnumerable<(B2D src, B2D dest)> Slices(B3D dest){
 			for(int z = 0; z < Width; z++) yield return (this.Slice(z), dest.Slice(z));
 		}
 
