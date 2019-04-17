@@ -195,24 +195,19 @@ namespace SHA3_CS {
 
 	}
 
-	internal class Sponge : B3D {
+	internal abstract class Sponge : B3D {
 
-		private bool[,,] bits;
-		public override int Length { get => bits.GetLength(0); }
-		public override int Height { get => bits.GetLength(1); }
-		public override int Width { get => bits.GetLength(2); }
+		internal class Bool3DArr : Sponge {
 
-		public Sponge(int l, int h, int w) => bits = new bool[l,h,w];
 
-		protected override B3D CCpy() => ClearCopy();
-		public new Sponge ClearCopy() => new Sponge(Length, Height, Width);
-		protected override B3D Cpy() => Copy();
-		public new Sponge Copy(){
-			Sponge d = ClearCopy();
-			Array.Copy(this.bits, d.bits, Length*Width*Height);
-			return d;
 		}
 
+
+
+		protected override B3D CCpy() => ClearCopy();
+		public new abstract Sponge ClearCopy();
+		protected override B3D Cpy() => Copy();
+		public new abstract Sponge Copy();
 
 		public new Sponge ReadFromBitString(BitString bs){
 			base.ReadFromBitString(bs);
