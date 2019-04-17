@@ -189,5 +189,10 @@ namespace SHA3_CS.Tests {
 			Assert.AreEqual(b1, (BitString.FromHexBE(new BitString(b1).ToHexBE())).Bits(), "Base 64 double conversion failed");
 		}
 
+		[Test]
+		public void TestByteHexLEConsistency(){
+			Assert.AreEqual(BitString.FromHexLE("616263").Bits(), BitString.FromBytesLE(new byte[]{0x61, 0x62, 0x63}).Bits(), "LE hex-bytes conversion is incosistent");
+		}
+
 	}
 }
