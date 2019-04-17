@@ -12,7 +12,7 @@ namespace SHA3_CS.Tests {
 		[Test]
 		[Repeat(10)]
 		public void TestMutabilityAndView(){
-			var S = new Sponge(rng.Next(1, 10), rng.Next(1, 10), rng.Next(1, 100));
+			Sponge S = new Sponge.Bool3DArr(rng.Next(1, 10), rng.Next(1, 10), rng.Next(1, 100));
 			void assertIntegrity(){
 				for(int x = 0; x < S.Length; x++) for(int y = 0; y < S.Height; y++) for(int z = 0; z < S.Width; z++){
 					var exp = S[x,y,z];
