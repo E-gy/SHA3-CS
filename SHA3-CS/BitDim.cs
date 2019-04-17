@@ -7,27 +7,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("SHA3_CS.Tests")]
 namespace SHA3_CS {
 
-	internal abstract class B3D {
-		public abstract bool this[int i, int j, int k]{ get; set; }
-	}
-
-	internal abstract class B2D {
-		public abstract int Length { get; }
-		public abstract int Width { get; }
-		public abstract bool this[int i, int j]{ get; set; }
-
-		public abstract B1D Lane(int x);
-		public abstract B1D Row(int z);
-
-		public IEnumerable<B1D> Lanes(){
-			for(int x = 0; x < Length; x++) yield return Lane(x);
-		}
-		public IEnumerable<B1D> Rows(){
-			for(int z = 0; z < Width; z++) yield return Row(z);
-		}
-
-		public string ToHexLanes() => String.Join("||", Lanes().Select(l => String.Concat(l.ToHex().Reverse()))) + "||";
-	}
+	//Abstract
 
 	internal abstract class B1D {
 
@@ -52,6 +32,97 @@ namespace SHA3_CS {
 		}
 
 	}
+
+	internal abstract class B2D {
+		public abstract int Length { get; }
+		public abstract int Width { get; }
+		public abstract bool this[int i, int j]{ get; set; }
+
+		public abstract B1D Lane(int x);
+		public abstract B1D Row(int z);
+
+		public IEnumerable<B1D> Lanes(){
+			for(int x = 0; x < Length; x++) yield return Lane(x);
+		}
+		public IEnumerable<B1D> Rows(){
+			for(int z = 0; z < Width; z++) yield return Row(z);
+		}
+
+		public string ToHexLanes() => String.Join("||", Lanes().Select(l => String.Concat(l.ToHex().Reverse()))) + "||";
+	}
+
+	internal abstract class B3D {
+
+		public abstract int Length { get; }
+		public abstract int Height { get; }
+		public abstract int Width { get; }
+
+		public abstract bool this[int i, int j, int k]{ get; set; }
+		public bool this[(int x, int y, int z) c]{
+			get => this[c.x, c.y, c.z];
+			set => this[c.x, c.y, c.z] = value;
+		}
+
+
+
+		public abstract B1D Lane(int x, int y);
+		public abstract B1D Column(int x, int z);
+		public abstract B1D Row(int y, int z);
+
+		public IEnumerable<B1D> Lanes(){
+			for(int x = 0; x < Length; x++) for(int y = 0; y < Height; y++) yield return Lane(x, y);
+		}
+		public IEnumerable<B1D> Columns(){
+			for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) yield return Column(x, z);
+		}
+		public IEnumerable<B1D> Rows(){
+			for(int y = 0; y < Height; y++) for(int z = 0; z < Width; z++) yield return Row(y, z);
+		}
+
+		public IEnumerable<(B1D src, B1D dest)> Lanes(Sponge dest){
+			for(int x = 0; x < Length; x++) for(int y = 0; y < Height; y++) yield return (this.Lane(x, y), dest.Lane(x, y));
+		}
+		public IEnumerable<(B1D src, B1D dest)> Columns(Sponge dest){
+			for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) yield return (this.Column(x, z), dest.Column(x, z));
+		}
+		public IEnumerable<(B1D src, B1D dest)> Rows(Sponge dest){
+			for(int y = 0; y < Height; y++) for(int z = 0; z < Width; z++) yield return (this.Row(y, z), dest.Row(y, z));
+		}
+
+
+
+		public abstract B2D Sheet(int x);
+		public abstract B2D Plane(int y);
+		public abstract B2D Slice(int z);
+
+		public IEnumerable<B2D> Sheets(){
+			for(int x = 0; x < Length; x++) yield return Sheet(x);
+		}
+		public IEnumerable<B2D> Planes(){
+			for(int y = 0; y < Height; y++) yield return Plane(y);
+		}
+		public IEnumerable<B2D> Slices(){
+			for(int z = 0; z < Width; z++) yield return Slice(z);
+		}
+
+		public IEnumerable<(B2D src, B2D dest)> Sheets(Sponge dest){
+			for(int x = 0; x < Length; x++) yield return (this.Sheet(x), dest.Sheet(x));
+		}
+		public IEnumerable<(B2D src, B2D dest)> Planes(Sponge dest){
+			for(int y = 0; y < Height; y++) yield return (this.Plane(y), dest.Plane(y));
+		}
+		public IEnumerable<(B2D src, B2D dest)> Slices(Sponge dest){
+			for(int z = 0; z < Width; z++) yield return (this.Slice(z), dest.Slice(z));
+		}
+
+
+
+		public string ToHexSheetsString() => String.Join("\n", Sheets().Select(s => s.ToHexLanes()));
+		public override string ToString() => ToHexSheetsString();
+
+	}
+
+	//Impl
 
 	class Strink : B1D {
 
@@ -111,9 +182,9 @@ namespace SHA3_CS {
 	internal class Sponge : B3D {
 
 		private bool[,,] bits;
-		public int Length { get => bits.GetLength(0); }
-		public int Height { get => bits.GetLength(1); }
-		public int Width { get => bits.GetLength(2); }
+		public override int Length { get => bits.GetLength(0); }
+		public override int Height { get => bits.GetLength(1); }
+		public override int Width { get => bits.GetLength(2); }
 
 		public Sponge(int l, int h, int w) => bits = new bool[l,h,w];
 
@@ -140,64 +211,14 @@ namespace SHA3_CS {
 			get => bits[x.mod(Length), y.mod(Height), z.mod(Width)];
 			set => bits[x.mod(Length), y.mod(Height), z.mod(Width)] = value;
 		}
-		public bool this[(int x, int y, int z) c]{
-			get => this[c.x, c.y, c.z];
-			set => this[c.x, c.y, c.z] = value;
-		}
 
-		public B1D Lane(int x, int y) => new S1D(this, Width, i => (x, y, i));
-		public B1D Column(int x, int z) => new S1D(this, Height, i => (x, i, z));
-		public B1D Row(int y, int z) => new S1D(this, Length, i => (i, y, z));
+		public override B1D Lane(int x, int y) => new S1D(this, Width, i => (x, y, i));
+		public override B1D Column(int x, int z) => new S1D(this, Height, i => (x, i, z));
+		public override B1D Row(int y, int z) => new S1D(this, Length, i => (i, y, z));
 
-		public IEnumerable<B1D> Lanes(){
-			for(int x = 0; x < Length; x++) for(int y = 0; y < Height; y++) yield return Lane(x, y);
-		}
-		public IEnumerable<B1D> Columns(){
-			for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) yield return Column(x, z);
-		}
-		public IEnumerable<B1D> Rows(){
-			for(int y = 0; y < Height; y++) for(int z = 0; z < Width; z++) yield return Row(y, z);
-		}
-
-		public IEnumerable<(B1D src, B1D dest)> Lanes(Sponge dest){
-			for(int x = 0; x < Length; x++) for(int y = 0; y < Height; y++) yield return (this.Lane(x, y), dest.Lane(x, y));
-		}
-		public IEnumerable<(B1D src, B1D dest)> Columns(Sponge dest){
-			for(int x = 0; x < Length; x++) for(int z = 0; z < Width; z++) yield return (this.Column(x, z), dest.Column(x, z));
-		}
-		public IEnumerable<(B1D src, B1D dest)> Rows(Sponge dest){
-			for(int y = 0; y < Height; y++) for(int z = 0; z < Width; z++) yield return (this.Row(y, z), dest.Row(y, z));
-		}
-
-
-
-		public B2D Sheet(int x) => new S2D(this, Height, Width, (i, j) => (x, i, j));
-		public B2D Plane(int y) => new S2D(this, Length, Width, (i, j) => (i, y, j));
-		public B2D Slice(int z) => new S2D(this, Length, Height, (i, j) => (i, j, z));
-
-		public IEnumerable<B2D> Sheets(){
-			for(int x = 0; x < Length; x++) yield return Sheet(x);
-		}
-		public IEnumerable<B2D> Planes(){
-			for(int y = 0; y < Height; y++) yield return Plane(y);
-		}
-		public IEnumerable<B2D> Slices(){
-			for(int z = 0; z < Width; z++) yield return Slice(z);
-		}
-
-		public IEnumerable<(B2D src, B2D dest)> Sheets(Sponge dest){
-			for(int x = 0; x < Length; x++) yield return (this.Sheet(x), dest.Sheet(x));
-		}
-		public IEnumerable<(B2D src, B2D dest)> Planes(Sponge dest){
-			for(int y = 0; y < Height; y++) yield return (this.Plane(y), dest.Plane(y));
-		}
-		public IEnumerable<(B2D src, B2D dest)> Slices(Sponge dest){
-			for(int z = 0; z < Width; z++) yield return (this.Slice(z), dest.Slice(z));
-		}
-
-		public string ToHexSheetsString() => String.Join("\n", Sheets().Select(s => s.ToHexLanes()));
-
-		public override string ToString() => ToHexSheetsString();
+		public override B2D Sheet(int x) => new S2D(this, Height, Width, (i, j) => (x, i, j));
+		public override B2D Plane(int y) => new S2D(this, Length, Width, (i, j) => (i, y, j));
+		public override B2D Slice(int z) => new S2D(this, Length, Height, (i, j) => (i, j, z));
 
 		protected class S2D : B2D {
 
