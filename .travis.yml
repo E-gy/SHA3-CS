@@ -1,0 +1,9 @@
+language: csharp
+solution: SHA3-CS.sln
+mono: none
+dotnet: 2.1.503
+install:
+ - dotnet restore
+script:
+ - dotnet build
+ - dotnet test
