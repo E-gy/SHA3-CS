@@ -28,7 +28,7 @@ namespace SHA3_CS {
 
 		public Keccak(int b = 1600) => (w, l) = GetPermutationWL(this.b = b);
 
-		protected virtual B3D NewSponge() => new Sponge(5, 5, w);
+		protected virtual B3D NewSponge() => new Sponge.Bool3DArr(5, 5, w);
 
 		internal B3D θ(B3D S){
 			var C = new Surface(S.Length, S.Width);

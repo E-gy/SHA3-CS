@@ -199,6 +199,19 @@ namespace SHA3_CS {
 
 		internal class Bool3DArr : Sponge {
 
+			private bool[,,] bits;
+			public override int Length { get => bits.GetLength(0); }
+			public override int Height { get => bits.GetLength(1); }
+			public override int Width { get => bits.GetLength(2); }
+
+			public Bool3DArr(int l, int h, int w) => bits = new bool[l,h,w];
+
+			public override Sponge ClearCopy() => new Bool3DArr(Length, Height, Width);
+			public override Sponge Copy(){
+				Bool3DArr d = (Bool3DArr) ClearCopy();
+				Array.Copy(this.bits, d.bits, Length*Width*Height);
+				return d;
+			}
 
 		}
 
