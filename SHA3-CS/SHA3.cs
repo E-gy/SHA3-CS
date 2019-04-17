@@ -5,23 +5,25 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("SHA3_CS.Tests")]
 namespace SHA3_CS {
 
-	public static class SHA3 {
+	public class SHA3 {
 
-		private static Func<BitString, BitString> mkSHA(int digestLength){
-			var SHA = new Keccak().Keccak_c(digestLength*2);
-			return S => SHA.Process(S+BitString.S0+BitString.S1, digestLength);
-		}
+		public static readonly SHA3 SHA224 = new SHA3(224);
+		public static readonly SHA3 SHA256 = new SHA3(256);
+		public static readonly SHA3 SHA384 = new SHA3(384);
+		public static readonly SHA3 SHA512 = new SHA3(512);
 
-		public static readonly Func<BitString, BitString> SHA224 = mkSHA(224);
-		public static readonly Func<BitString, BitString> SHA256 = mkSHA(256);
-		public static readonly Func<BitString, BitString> SHA384 = mkSHA(384);
-		public static readonly Func<BitString, BitString> SHA512 = mkSHA(512);
+		public readonly int digestLength;
+		private readonly SpongeConstructor constructor;
 
-		public static readonly Func<string, string> SHA224UTF8 = s => SHA224(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s))).ToHexLE();
-		public static readonly Func<string, string> SHA256UTF8 = s => SHA256(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s))).ToHexLE();
-		public static readonly Func<string, string> SHA384UTF8 = s => SHA384(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s))).ToHexLE();
-		public static readonly Func<string, string> SHA512UTF8 = s => SHA512(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s))).ToHexLE();
-		
+		public SHA3(int d) => constructor = new Keccak().Keccak_c((digestLength = d)*2);
+
+		public BitString Hash(BitString S) => constructor.Process(S+BitString.S0+BitString.S1, digestLength);
+		public BitString Hash(string hexS) => Hash(BitString.FromHexLE(hexS));
+		public BitString HashUTF8(string s) => Hash(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s)));
+
+		public string HashHexHex(string hexS) => Hash(hexS).ToHexLE();
+		public string HashUTF8Hex(string s) => HashUTF8(s).ToHexLE();
+
 	}
 
 }
