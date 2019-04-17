@@ -213,7 +213,6 @@ namespace SHA3_CS {
 			return d;
 		}
 
-		public static Sponge FromBitString(BitString bs, int l, int h, int w) => new Sponge(l, h, w).ReadFromBitString(bs);
 
 		public new Sponge ReadFromBitString(BitString bs){
 			base.ReadFromBitString(bs);
