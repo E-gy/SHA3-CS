@@ -28,12 +28,14 @@ namespace SHA3_CS {
 
 		public Keccak(int b = 1600) => (w, l) = GetPermutationWL(this.b = b);
 
-		internal Sponge θ(Sponge S){
+		protected virtual B3D NewSponge() => new Sponge(5, 5, w);
+
+		internal B3D θ(B3D S){
 			var C = new Surface(S.Length, S.Width);
 			for(int x = 0; x < S.Length; x++) for(int z = 0; z < S.Width; z++) C[x,z] = S.Column(x,z).Σ();
 			var D = new Surface(S.Length, S.Width);
 			for(int x = 0; x < S.Length; x++) for(int z = 0; z < S.Width; z++) D[x,z] = C[x-1, z]^C[x+1,z-1];
-			Sponge s = S.ClearCopy();
+			B3D s = S.ClearCopy();
 			for(int x = 0; x < S.Length; x++) for(int z = 0; z < S.Width; z++){
 				var d = D[x,z];
 				for(int y = 0; y < S.Height; y++) s[x,y,z] = S[x,y,z]^d;
@@ -41,8 +43,8 @@ namespace SHA3_CS {
 			return s;//OK!
 		}
 
-		internal Sponge ρ(Sponge S){
-			Sponge s = S.ClearCopy();
+		internal B3D ρ(B3D S){
+			B3D s = S.ClearCopy();
 			S.Lane(0, 0).CopyTo(s.Lane(0, 0));
 			int x = 1, y = 0;
 			for(int t = 0; t < 24; t++){
@@ -52,19 +54,19 @@ namespace SHA3_CS {
 			return s;//OK!
 		}
 
-		internal Sponge π(Sponge S){
-			Sponge s = S.ClearCopy();
+		internal B3D π(B3D S){
+			B3D s = S.ClearCopy();
 			for(int z = 0; z < S.Width; z++) for(int x = 0; x < S.Length; x++) for(int y = 0; y < S.Height; y++) s[x,y,z] = S[x+3*y,x,z];
 			return s;//OK!
 		}
 
-		internal Sponge χ(Sponge S){
-			Sponge s = S.ClearCopy();
+		internal B3D χ(B3D S){
+			B3D s = S.ClearCopy();
 			foreach(var (sR, dr) in S.Rows(s)) for(int x = 0; x < sR.Length; x++) dr[x] = sR[x]^( (!sR[x+1]) & sR[x+2] );
 			return s;//OK!
 		}
 
-		internal Sponge ι(Sponge S, int Ir){
+		internal B3D ι(B3D S, int Ir){
 			bool rc(int t){
 				if(t.mod(255) == 0) return true;
 				var R = BitString.TakeBits(0b10000000, 8);
@@ -80,21 +82,21 @@ namespace SHA3_CS {
 				return R[0];
 			}
 
-			Sponge s = S.Copy();
+			B3D s = S.Copy();
 			var RC = BitString.oS(w);
 			for(int j = 0; j <= l; j++) RC = RC.Set((int) Math.Pow(2, j) - 1, rc(j + 7*Ir));
 			for(int z = 0; z < S.Width; z++) s[0,0,z] = S[0,0,z]^RC[z];
 			return s;//OK!
 		}
 
-		internal Sponge Rnd(Sponge S, int Ir) => ι(χ(π(ρ(θ(S)))), Ir);
+		internal B3D Rnd(B3D S, int Ir) => ι(χ(π(ρ(θ(S)))), Ir);
 
-		internal Sponge Keccak_p(Sponge S, int Nr){
+		internal B3D Keccak_p(B3D S, int Nr){
 			for(int i = 0; i < Nr; i++) S = Rnd(S,i);
 			return S;
 		}
 
-		internal Sponge Keccak_f(Sponge S) => Keccak_p(S, 12+2*l);
+		internal B3D Keccak_f(B3D S) => Keccak_p(S, 12+2*l);
 
 		public SpongeConstructor Keccak_c(int c) => new KSpongeConstructor(this, c);
 
@@ -104,7 +106,7 @@ namespace SHA3_CS {
 
 			internal KSpongeConstructor(Keccak keccak, int c) : base(keccak.b-c) => this.keccak = keccak;
 
-			protected override BitString FMap(BitString S) => keccak.Keccak_f(Sponge.FromBitString(S, 5, 5, keccak.w)).ToBitString();
+			protected override BitString FMap(BitString S) => keccak.Keccak_f(keccak.NewSponge().ReadFromBitString(S)).ToBitString();
 			protected override BitString Padding(int x, int m) => BitString.S1+BitString.oS((-m-2).mod(x))+BitString.S1;
 			protected override int b => keccak.b;
 
