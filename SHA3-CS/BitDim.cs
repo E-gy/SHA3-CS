@@ -63,7 +63,10 @@ namespace SHA3_CS {
 			set => this[c.x, c.y, c.z] = value;
 		}
 
-
+		protected abstract B3D CCpy();
+		public B3D ClearCopy() => CCpy();
+		protected abstract B3D Cpy();
+		public B3D Copy() => Cpy();
 
 		public abstract B1D Lane(int x, int y);
 		public abstract B1D Column(int x, int z);
@@ -188,8 +191,10 @@ namespace SHA3_CS {
 
 		public Sponge(int l, int h, int w) => bits = new bool[l,h,w];
 
-		public Sponge ClearCopy() => new Sponge(Length, Height, Width);
-		public Sponge Copy(){
+		protected override B3D CCpy() => ClearCopy();
+		public new Sponge ClearCopy() => new Sponge(Length, Height, Width);
+		protected override B3D Cpy() => Copy();
+		public new Sponge Copy(){
 			Sponge d = ClearCopy();
 			Array.Copy(this.bits, d.bits, Length*Width*Height);
 			return d;
