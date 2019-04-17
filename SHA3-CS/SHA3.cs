@@ -19,7 +19,7 @@ namespace SHA3_CS {
 
 		public SHA3(int d) => constructor = KECCAK1600.Keccak_c((digestLength = d)*2);
 
-		public BitString Hash(BitString S) => constructor.Process(S+BitString.S0+BitString.S1, digestLength);
+		public BitString Hash(BitString S) => constructor.Process(S+(BitString.S0+BitString.S1), digestLength);
 		public BitString Hash(string hexS) => Hash(BitString.FromHexLE(hexS));
 		public BitString HashUTF8(string s) => Hash(BitString.FromBytesLE(Encoding.UTF8.GetBytes(s)));
 
