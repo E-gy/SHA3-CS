@@ -8,8 +8,8 @@ namespace SHA3_CS {
 	public static class SHA3 {
 
 		private static Func<BitString, BitString> mkSHA(int digestLength){
-			var SHA = Keccak.Keccak_c(digestLength*2);
-			return S => SHA(S+BitString.S0+BitString.S1, digestLength);
+			var SHA = new Keccak().Keccak_c(digestLength*2);
+			return S => SHA.Process(S+BitString.S0+BitString.S1, digestLength);
 		}
 
 		public static readonly Func<BitString, BitString> SHA224 = mkSHA(224);
