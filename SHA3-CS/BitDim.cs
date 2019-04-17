@@ -9,7 +9,7 @@ namespace SHA3_CS {
 
 	//Abstract
 
-	internal abstract class B1D {
+	public abstract class B1D {
 
 		public abstract int Length { get; }
 		public abstract bool this[int i]{ get; set; }
@@ -33,7 +33,7 @@ namespace SHA3_CS {
 
 	}
 
-	internal abstract class B2D {
+	public abstract class B2D {
 		public abstract int Length { get; }
 		public abstract int Width { get; }
 		public abstract bool this[int i, int j]{ get; set; }
@@ -51,7 +51,7 @@ namespace SHA3_CS {
 		public string ToHexLanes() => String.Join("||", Lanes().Select(l => String.Concat(l.ToHex().Reverse()))) + "||";
 	}
 
-	internal abstract class B3D {
+	public abstract class B3D {
 
 		public abstract int Length { get; }
 		public abstract int Height { get; }
