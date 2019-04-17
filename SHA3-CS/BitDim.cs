@@ -206,6 +206,11 @@ namespace SHA3_CS {
 
 			public Bool3DArr(int l, int h, int w) => bits = new bool[l,h,w];
 
+			public override bool this[int x, int y, int z]{
+				get => bits[x.mod(Length), y.mod(Height), z.mod(Width)];
+				set => bits[x.mod(Length), y.mod(Height), z.mod(Width)] = value;
+			}
+
 			public override Sponge ClearCopy() => new Bool3DArr(Length, Height, Width);
 			public override Sponge Copy(){
 				Bool3DArr d = (Bool3DArr) ClearCopy();
@@ -225,11 +230,6 @@ namespace SHA3_CS {
 		public new Sponge ReadFromBitString(BitString bs){
 			base.ReadFromBitString(bs);
 			return this;
-		}
-
-		public override bool this[int x, int y, int z]{
-			get => bits[x.mod(Length), y.mod(Height), z.mod(Width)];
-			set => bits[x.mod(Length), y.mod(Height), z.mod(Width)] = value;
 		}
 
 		public override B1D Lane(int x, int y) => new S1D(this, Width, i => (x, y, i));
