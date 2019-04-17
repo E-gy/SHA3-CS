@@ -7,6 +7,8 @@ namespace SHA3_CS {
 
 	public class SHA3 {
 
+		private static readonly Keccak KECCAK1600 = new Keccak(1600);
+
 		public static readonly SHA3 SHA224 = new SHA3(224);
 		public static readonly SHA3 SHA256 = new SHA3(256);
 		public static readonly SHA3 SHA384 = new SHA3(384);
@@ -15,7 +17,7 @@ namespace SHA3_CS {
 		public readonly int digestLength;
 		private readonly SpongeConstructor constructor;
 
-		public SHA3(int d) => constructor = new Keccak().Keccak_c((digestLength = d)*2);
+		public SHA3(int d) => constructor = KECCAK1600.Keccak_c((digestLength = d)*2);
 
 		public BitString Hash(BitString S) => constructor.Process(S+BitString.S0+BitString.S1, digestLength);
 		public BitString Hash(string hexS) => Hash(BitString.FromHexLE(hexS));
