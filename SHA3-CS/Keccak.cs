@@ -55,9 +55,9 @@ namespace SHA3_CS {
 		}
 
 		internal B3D π(B3D S){
-			B3D s = S.ClearCopy();
-			for(int z = 0; z < S.Width; z++) for(int x = 0; x < S.Length; x++) for(int y = 0; y < S.Height; y++) s[x,y,z] = S[x+3*y,x,z];
-			return s;//OK!
+			B3D bob = S.ClearCopy();
+			for(int z = 0; z < S.Width; z++) for(int x = 0; x < S.Length; x++) for(int y = 0; y < S.Height; y++) bob[x,y,z] = S[x+3*y,x,z];
+			return bob;//OK!
 		}
 
 		internal B3D χ(B3D S){
